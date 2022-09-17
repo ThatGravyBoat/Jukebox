@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 import tech.thatgravyboat.jukebox.api.service.BaseService
 import tech.thatgravyboat.jukebox.api.service.ServicePhase
 import tech.thatgravyboat.jukebox.api.state.RepeatState
+import tech.thatgravyboat.jukebox.api.state.ShuffleState
 import tech.thatgravyboat.jukebox.api.state.State
 import tech.thatgravyboat.jukebox.impl.spotify.state.SpotifyError
 import tech.thatgravyboat.jukebox.impl.spotify.state.SpotifyErrorState
@@ -78,31 +79,37 @@ class SpotifyService(var token: String?) : BaseService() {
     }
 
     //region State Management
-    override fun setPaused(paused: Boolean) {
+    override fun setPaused(paused: Boolean): Boolean {
         val state = getState()
-        if (state == null || token == null) return
+        if (state == null || token == null) return false
         val path = if (!paused && !state.isPlaying) "play" else if (paused && state.isPlaying) "pause" else null
         path?.let {
             putCode(API_URL + path) {
                 if (it.status == HttpStatusCode.Unauthorized) onUnauthorized()
             }
         }
+        return path != null
     }
 
-    override fun setShuffle(shuffle: Boolean) {
+    override fun setShuffle(shuffle: Boolean): Boolean {
         val state = getState()
-        if (state == null || token == null) return
-        val shuffleState: Boolean? = if (shuffle && !state.isShuffling) true else if (!shuffle && state.isShuffling) false else null
+        if (state == null || token == null) return false
+        val shuffleState: Boolean? = when {
+            (shuffle && state.player.shuffle == ShuffleState.OFF) -> true
+            (!shuffle && state.player.shuffle == ShuffleState.ON) -> false
+            else -> null
+        }
         shuffleState?.let {
             putCode( API_URL + "shuffle?state=$shuffleState") {
                 if (it.status == HttpStatusCode.Unauthorized) onUnauthorized()
             }
         }
+        return shuffleState != null
     }
 
-    override fun setRepeat(repeat: RepeatState) {
+    override fun setRepeat(repeat: RepeatState): Boolean {
         val state = getState()
-        if (state == null || token == null) return
+        if (state == null || token == null) return false
         val repeatState: String? = when {
             checkRepeatState(RepeatState.OFF, repeat, state) -> "off"
             checkRepeatState(RepeatState.SONG, repeat, state) -> "track"
@@ -114,21 +121,24 @@ class SpotifyService(var token: String?) : BaseService() {
                 if (it.status  == HttpStatusCode.Unauthorized) onUnauthorized()
             }
         }
+        return repeatState != null
     }
 
-    override fun move(forward: Boolean) {
-        if (token == null) return
+    override fun move(forward: Boolean): Boolean {
+        if (token == null) return false
         val path = if (forward) "next" else "previous"
         postCode(API_URL + path) {
             if (it.status  == HttpStatusCode.Unauthorized) onUnauthorized()
         }
+        return true
     }
 
-    override fun setVolume(volume: Int, notify: Boolean) {
+    override fun setVolume(volume: Int, notify: Boolean): Boolean {
         putCode(API_URL + "volume?volume_percent=$volume") {
             if (it.status == HttpStatusCode.Unauthorized) onUnauthorized()
-            else onVolumeChange(volume, notify  )
+            else onVolumeChange(volume, notify)
         }
+        return volume in 0..100
     }
     //endregion
 

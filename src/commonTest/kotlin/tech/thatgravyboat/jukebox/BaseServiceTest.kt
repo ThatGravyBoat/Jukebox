@@ -10,7 +10,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 private val TEST_STATE = State(
-    PlayerState(false, RepeatState.ALL, 100),
+    PlayerState(ShuffleState.OFF, RepeatState.ALL, 100),
     Song("test", listOf("Artist1", "Artist2"), "https://localhost:6969/cover.png", "https://localhost:6969/song", PlayingType.TRACK),
     SongState(50, 100, true)
 )
@@ -100,13 +100,13 @@ object BaseServiceTest {
 
     class TestService : BaseService() {
         override fun start() {}
-        override fun stop(): Boolean = true
+        override fun stop() = true
         override fun restart() {}
         override fun getPhase() = ServicePhase.STOPPED
-        override fun setPaused(paused: Boolean) {}
-        override fun setShuffle(shuffle: Boolean) {}
-        override fun setRepeat(repeat: RepeatState) {}
-        override fun setVolume(volume: Int, notify: Boolean) {}
-        override fun move(forward: Boolean) {}
+        override fun setPaused(paused: Boolean) = true
+        override fun setShuffle(shuffle: Boolean) = true
+        override fun setRepeat(repeat: RepeatState) = true
+        override fun setVolume(volume: Int, notify: Boolean) = true
+        override fun move(forward: Boolean) = true
     }
 }

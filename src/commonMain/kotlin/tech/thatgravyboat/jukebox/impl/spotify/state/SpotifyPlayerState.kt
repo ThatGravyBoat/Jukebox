@@ -2,10 +2,7 @@ package tech.thatgravyboat.jukebox.impl.spotify.state
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import tech.thatgravyboat.jukebox.api.state.PlayerState
-import tech.thatgravyboat.jukebox.api.state.Song
-import tech.thatgravyboat.jukebox.api.state.SongState
-import tech.thatgravyboat.jukebox.api.state.State
+import tech.thatgravyboat.jukebox.api.state.*
 
 @Serializable
 data class PlayerItem(
@@ -63,7 +60,7 @@ data class SpotifyPlayerState(
                 item.album.images.sortedWith(compareByDescending(AlbumImage::width)).first().url,
                 item.urls.url,
                 playingType.base)
-            val playerState = PlayerState(isShuffling, repeat.base, device.volumePercent)
+            val playerState = PlayerState(if (isShuffling) ShuffleState.ON else ShuffleState.OFF, repeat.base, device.volumePercent)
             return State(playerState, song, songState)
         }
 }

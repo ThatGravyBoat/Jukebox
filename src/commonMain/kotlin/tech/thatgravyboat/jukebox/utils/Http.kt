@@ -10,9 +10,19 @@ object Http {
 
     private val client = HttpClient {
         BrowserUserAgent()
+        install(HttpTimeout)
     }
 
-    operator fun Url.plus(path: String): Url = URLBuilder(this).clone().appendPathSegments(path).build()
+    operator fun Url.plus(path: String): Url {
+        val segments = path.split("?")
+        return URLBuilder(this).clone().appendPathSegments(segments[0]).apply {
+            if (segments.size > 1) {
+                segments[1].split("&")
+                    .map { it.split("=") }
+                    .forEach { parameters.append(it[0], it[1]) }
+            }
+        }.build()
+    }
 
     fun Url.put(body: String? = null, contentType: ContentType? = null, headers: Map<String, String>? = null, callback: HttpCallback) {
         return call("PUT", body, contentType, headers, callback)

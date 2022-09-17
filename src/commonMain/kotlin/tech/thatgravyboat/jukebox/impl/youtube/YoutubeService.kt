@@ -67,18 +67,20 @@ class YoutubeService(password: String) : BaseService() {
     }
 
     //region State Management
-    override fun setPaused(paused: Boolean) {
-        val state = getState() ?: return
+    override fun setPaused(paused: Boolean): Boolean {
+        val state = getState() ?: return false
         val path = if (!paused && !state.isPlaying) "track-play" else if (paused && state.isPlaying) "track-pause" else null
         path?.let(this::command)
+        return path != null
     }
 
-    override fun setShuffle(shuffle: Boolean) {
+    override fun setShuffle(shuffle: Boolean): Boolean {
         // We don't shuffle 'round these parts!
+        return false
     }
 
-    override fun setRepeat(repeat: RepeatState) {
-        val state = getState() ?: return
+    override fun setRepeat(repeat: RepeatState): Boolean {
+        val state = getState() ?: return false
         val repeatState: String? = when {
             checkRepeatState(RepeatState.OFF, repeat, state) -> "NONE"
             checkRepeatState(RepeatState.SONG, repeat, state) -> "ONE"
@@ -88,16 +90,19 @@ class YoutubeService(password: String) : BaseService() {
         repeatState?.let {
             command("player-repeat", it)
         }
+        return repeatState != null
     }
 
-    override fun move(forward: Boolean) {
+    override fun move(forward: Boolean): Boolean {
         command(if (forward) "track-next" else "track-previous")
+        return true
     }
 
-    override fun setVolume(volume: Int, notify: Boolean) {
+    override fun setVolume(volume: Int, notify: Boolean): Boolean {
         command("player-set-volume", volume.toString()) {
             onVolumeChange(volume, notify)
         }
+        return volume in 0..100
     }
     //endregion
 

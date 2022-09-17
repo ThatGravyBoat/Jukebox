@@ -38,7 +38,7 @@ data class YoutubePlayerState(
                 track.url,
                 if (track.isAd) PlayingType.AD else PlayingType.TRACK
             )
-            val playerState = PlayerState(false, player.repeat.base, player.volumePercentage)
+            val playerState = PlayerState(ShuffleState.DISABLED, player.repeat.base, player.volumePercentage)
             return State(playerState, song, songState)
         }
 }

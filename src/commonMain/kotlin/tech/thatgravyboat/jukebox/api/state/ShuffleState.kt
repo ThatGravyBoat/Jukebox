@@ -1,8 +1,7 @@
 package tech.thatgravyboat.jukebox.api.state
 
-enum class RepeatState {
+enum class ShuffleState {
     DISABLED,
     OFF,
-    SONG,
-    ALL
+    ON
 }

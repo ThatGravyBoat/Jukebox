@@ -16,11 +16,11 @@ interface Service {
 
     fun getState(): State?
 
-    fun setPaused(paused: Boolean)
-    fun setShuffle(shuffle: Boolean)
-    fun setRepeat(repeat: RepeatState)
-    fun setVolume(volume: Int, notify: Boolean = false)
-    fun move(forward: Boolean)
+    fun setPaused(paused: Boolean): Boolean
+    fun setShuffle(shuffle: Boolean): Boolean
+    fun setRepeat(repeat: RepeatState): Boolean
+    fun setVolume(volume: Int, notify: Boolean = false): Boolean
+    fun move(forward: Boolean): Boolean
 
     fun next() = move(true)
     fun prev() = move(false)

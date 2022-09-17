@@ -15,4 +15,12 @@ object UrlTest {
 
         assertTrue(newURI.toString() == "http://localhost:8080/subpath.html", "Url resolve did not create a valid URI.")
     }
+
+    @Test
+    fun resolveQueryUrlTest() {
+        val uri = Url("http://localhost:8080")
+        val newURI = uri + "subpath.html?query=true"
+
+        assertTrue(newURI.toString() == "http://localhost:8080/subpath.html?query=true", "Url resolve did not create a valid URI with the query.")
+    }
 }
