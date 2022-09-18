@@ -58,22 +58,25 @@ class SpotifyService(var token: String?) : BaseService() {
         API_URL.get(headers = authHeaders) { response ->
             if (response.status == HttpStatusCode.Unauthorized) {
                 onUnauthorized()
-            } else {
+            } else if (response.status == HttpStatusCode.OK) {
                 val json = Json { ignoreUnknownKeys = true }
 
-                val data = try {
-                    json.decodeFromString(SpotifyStateSerializer, response.bodyAsText())
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    SpotifyErrorState(SpotifyError(UShort.MAX_VALUE, "Error parsing Player JSON"))
-                }
+                val body = response.bodyAsText()
+                if (body.isNotBlank()) {
+                    val data = try {
+                        json.decodeFromString(SpotifyStateSerializer, body)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        println("Json Error: $body")
+                        SpotifyErrorState(SpotifyError(UShort.MAX_VALUE, "Error parsing Player JSON"))
+                    }
 
-                if (data is SpotifyErrorState) {
-                    onError("Polling error: ${data.error}")
-                } else if (data is SpotifyPlayerState) {
-                    onSuccess(data.state)
+                    if (data is SpotifyErrorState) {
+                        onError("Polling error: ${data.error}")
+                    } else if (data is SpotifyPlayerState) {
+                        onSuccess(data.state)
+                    }
                 }
-                response.bodyAsText()
             }
         }
     }

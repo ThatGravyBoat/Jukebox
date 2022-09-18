@@ -6,6 +6,7 @@ import tech.thatgravyboat.jukebox.api.service.BaseService
 import tech.thatgravyboat.jukebox.api.service.ServicePhase
 import tech.thatgravyboat.jukebox.api.state.*
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -61,7 +62,7 @@ object BaseServiceTest {
 
         assertTrue(songChanged, "Song change event not called.")
         assertTrue(songUpdated, "Song update event not called.")
-        assertTrue(service.getState() == TEST_STATE, "Service state was not set.")
+        assertEquals(service.getState(), TEST_STATE, "Service state was not set.")
     }
 
     @Test
