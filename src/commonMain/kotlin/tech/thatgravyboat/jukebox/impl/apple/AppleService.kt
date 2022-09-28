@@ -49,8 +49,8 @@ class AppleService : BaseService() {
                             }
                         }
                     }
-                    if (!messages.isEmpty()) {
-                        send(messages.removeFirst())
+                    messages.removeFirstOrNull()?.let {
+                        send(it)
                     }
                 }
                 connected = false
