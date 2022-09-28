@@ -44,7 +44,7 @@ data class ApplePlayerState(
 
     val state: State
         get() {
-            val songState = SongState(data.duration - data.remainingTime.toInt(), data.duration, data.playing)
+            val songState = SongState((data.duration - data.remainingTime.toInt()) / 1000, data.duration / 1000, data.playing)
             val song = Song(
                 data.title,
                 listOf(data.artist),

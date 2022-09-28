@@ -28,6 +28,7 @@ class AppleService : BaseService() {
     }
 
     override fun start() {
+        stopped = false
         Scheduler.async {
             client.webSocket(method = HttpMethod.Get, host = API_URL.host, port = API_URL.port, path = API_URL.encodedPath) {
                 while (!stopped) {
