@@ -12,8 +12,8 @@ data class Url(
 
 @Serializable
 data class Artwork(
-    @SerialName("width") val width: Int,
-    @SerialName("height") val height: Int,
+    @SerialName("width") val width: Int = 600,
+    @SerialName("height") val height: Int = 600,
     @SerialName("url") val url: String,
 ) {
     fun toUrl() = url.replace("{w}", width.toString()).replace("{h}", height.toString())
