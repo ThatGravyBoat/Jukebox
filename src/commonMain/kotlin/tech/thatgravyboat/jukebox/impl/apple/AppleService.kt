@@ -33,19 +33,20 @@ class AppleService : BaseService() {
             client.webSocket(method = HttpMethod.Get, host = API_URL.host, port = API_URL.port, path = API_URL.encodedPath) {
                 while (!stopped) {
                     connected = true
-                    val text = incoming.receive() as? Frame.Text
-                    if (text != null) {
-                        val json = Json { ignoreUnknownKeys = true }
+                    incoming.tryReceive().getOrNull()?.let { frame ->
+                        (frame as? Frame.Text)?.let { text ->
+                            val json = Json { ignoreUnknownKeys = true }
 
-                        try {
-                            json.decodeFromString(AppleStateSerializer, text.readText())
-                        }catch (e: Exception) {
-                            e.printStackTrace()
-                            onError("Error parsing Player JSON")
-                            null
-                        }?.apply{
-                            if (this is ApplePlayerState) {
-                                onSuccess(state)
+                            try {
+                                json.decodeFromString(AppleStateSerializer, text.readText())
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                onError("Error parsing Player JSON")
+                                null
+                            }?.apply {
+                                if (this is ApplePlayerState) {
+                                    onSuccess(state)
+                                }
                             }
                         }
                     }
