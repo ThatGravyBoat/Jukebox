@@ -69,7 +69,11 @@ class YoutubeService(password: String) : BaseService() {
     //region State Management
     override fun setPaused(paused: Boolean): Boolean {
         val state = getState() ?: return false
-        val path = if (!paused && !state.isPlaying) "track-play" else if (paused && state.isPlaying) "track-pause" else null
+        val path = when {
+            paused && state.isPlaying -> "track-pause"
+            !paused && !state.isPlaying -> "track-play"
+            else -> null
+        }
         path?.let(this::command)
         return path != null
     }
