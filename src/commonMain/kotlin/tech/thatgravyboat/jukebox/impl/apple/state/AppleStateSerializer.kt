@@ -10,7 +10,12 @@ import kotlinx.serialization.json.jsonPrimitive
 object AppleStateSerializer : JsonContentPolymorphicSerializer<AppleState>(AppleState::class) {
 
     override fun selectDeserializer(element: JsonElement) = when(element.jsonObject.get("type")?.jsonPrimitive?.content) {
-        "playbackStateUpdate" -> ApplePlayerState.serializer()
+        "playbackStateUpdate" -> {
+            if (element.jsonObject["data"]?.jsonObject?.get("playParams")?.jsonObject?.get("id")?.jsonPrimitive?.content == "no-id-found") {
+                BaseAppleState.serializer()
+            }
+            ApplePlayerState.serializer()
+        }
         else -> BaseAppleState.serializer()
     }
 
