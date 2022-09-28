@@ -14,7 +14,7 @@ data class Url(
 data class Artwork(
     @SerialName("width") val width: Int = 600,
     @SerialName("height") val height: Int = 600,
-    @SerialName("url") val url: String,
+    @SerialName("url") val url: String = "",
 ) {
     fun toUrl() = url.replace("{w}", width.toString()).replace("{h}", height.toString())
 }
@@ -22,16 +22,16 @@ data class Artwork(
 
 @Serializable
 data class StateData(
-    @SerialName("artistName") val artist: String,
+    @SerialName("artistName") val artist: String = "Unknown Artist",
     @SerialName("artwork") val artwork: Artwork,
-    @SerialName("durationInMillis") val duration: Int,
-    @SerialName("name") val title: String,
+    @SerialName("durationInMillis") val duration: Int = 1,
+    @SerialName("name") val title: String = "",
     @SerialName("status") val playing: Boolean,
     @SerialName("url") val url: Url,
-    @SerialName("remainingTime") val remainingTime: Float,
-    @SerialName("volume") val volume: Float,
-    @SerialName("shuffleMode") val shuffleMode: Int,
-    @SerialName("repeatMode") val repeatMode: Int,
+    @SerialName("remainingTime") val remainingTime: Float = 0f,
+    @SerialName("volume") val volume: Float = 0.25f,
+    @SerialName("shuffleMode") val shuffleMode: Int = 0,
+    @SerialName("repeatMode") val repeatMode: Int = 0,
 )
 
 @Serializable

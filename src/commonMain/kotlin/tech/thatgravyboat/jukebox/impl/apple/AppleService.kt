@@ -81,16 +81,8 @@ class AppleService : BaseService() {
     }
 
     override fun setPaused(paused: Boolean): Boolean {
-        val state = getState() ?: return false
-        val path = when {
-            paused && state.isPlaying -> "pause"
-            !paused && !state.isPlaying -> "play"
-            else -> null
-        }
-        path?.let {
-            messages.add("{\"action\":\"$path\"}")
-        }
-        return path != null
+        messages.add("{\"action\":\"${if (paused) "pause" else "play"}\"}")
+        return true
     }
 
     override fun setShuffle(shuffle: Boolean): Boolean {
@@ -122,7 +114,7 @@ class AppleService : BaseService() {
 
     override fun setVolume(volume: Int, notify: Boolean): Boolean {
         if (volume in 0..100) {
-            messages.add("{\"action\":\"volume\", \"volume\":${volume/100}}")
+            messages.add("{\"action\":\"volume\", \"volume\":${(volume.toDouble()/100.0)}}")
             onVolumeChange(volume, notify)
             return true
         }
