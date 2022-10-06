@@ -101,14 +101,14 @@ class AppleService : BaseService() {
 
     override fun setRepeat(repeat: RepeatState): Boolean {
         val state = getState() ?: return false
-        val repeatState: String? = when {
-            checkRepeatState(RepeatState.OFF, repeat, state) -> "NONE"
-            checkRepeatState(RepeatState.SONG, repeat, state) -> "ONE"
-            checkRepeatState(RepeatState.ALL, repeat, state) -> "ALL"
+        val repeatState: Int? = when {
+            checkRepeatState(RepeatState.OFF, repeat, state) -> 0
+            checkRepeatState(RepeatState.SONG, repeat, state) -> 1
+            checkRepeatState(RepeatState.ALL, repeat, state) -> 2
             else -> null
         }
         repeatState?.let {
-            messages.add("{\"action\":\"repeat\"}")
+            messages.add("{\"action\":\"set-repeat\", \"repeat\":$it}")
         }
         return repeatState != null
     }
