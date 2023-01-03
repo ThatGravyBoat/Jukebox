@@ -1,7 +1,7 @@
 # Jukebox
 This is a kotlin library for controlling multiple music services.
 <br>
-As of writing this it supports YTMD and Spotify.
+As of writing this it supports YTMD, Cider(Apple Music), and Spotify.
 
 Here is the maven metadata im too lazy to give you a copy paste thing.
 <br>
