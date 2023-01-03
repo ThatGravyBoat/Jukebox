@@ -6,9 +6,9 @@ import kotlinx.coroutines.Job
 import kotlinx.serialization.json.Json
 import tech.thatgravyboat.jukebox.api.service.BaseService
 import tech.thatgravyboat.jukebox.api.service.ServicePhase
+import tech.thatgravyboat.jukebox.api.service.ServiceType
 import tech.thatgravyboat.jukebox.api.state.RepeatState
 import tech.thatgravyboat.jukebox.api.state.ShuffleState
-import tech.thatgravyboat.jukebox.api.state.State
 import tech.thatgravyboat.jukebox.impl.spotify.state.SpotifyError
 import tech.thatgravyboat.jukebox.impl.spotify.state.SpotifyErrorState
 import tech.thatgravyboat.jukebox.impl.spotify.state.SpotifyPlayerState
@@ -145,11 +145,11 @@ class SpotifyService(var token: String?) : BaseService() {
     }
     //endregion
 
+    override fun getServiceType() = ServiceType.HTTP
+
     //region Utils
     private fun postCode(url: Url, callback: HttpCallback) = url.post(body = "", headers = authHeaders, callback = callback)
     private fun putCode(url: Url, callback: HttpCallback) = url.put(body = "", headers = authHeaders, callback = callback)
-
-    private fun checkRepeatState(repeat: RepeatState, check: RepeatState, state: State) = check == repeat && state.player.repeat != repeat
     //endregion
 
 }

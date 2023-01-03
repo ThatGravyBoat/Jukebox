@@ -2,7 +2,7 @@ package tech.thatgravyboat.jukebox.api.events
 
 import tech.thatgravyboat.jukebox.api.events.callbacks.*
 
-class EventType<T: Event> private constructor() {
+class EventType<T> private constructor() {
 
      companion object {
          /** Called when a song has been fetched. */

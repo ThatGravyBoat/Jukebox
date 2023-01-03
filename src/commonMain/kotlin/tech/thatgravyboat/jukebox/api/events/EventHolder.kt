@@ -1,8 +1,6 @@
 package tech.thatgravyboat.jukebox.api.events
 
-import tech.thatgravyboat.jukebox.api.events.callbacks.Event
-
-class EventHolder<T: Event> {
+class EventHolder<T> {
 
     private val listeners = mutableListOf<(T) -> Unit>()
 

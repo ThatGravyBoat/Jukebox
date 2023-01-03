@@ -1,6 +1,6 @@
 package tech.thatgravyboat.jukebox
 
-import tech.thatgravyboat.jukebox.api.events.EventType
+import tech.thatgravyboat.jukebox.api.events.*
 import tech.thatgravyboat.jukebox.api.events.callbacks.*
 import tech.thatgravyboat.jukebox.api.service.BaseService
 import tech.thatgravyboat.jukebox.api.service.ServicePhase

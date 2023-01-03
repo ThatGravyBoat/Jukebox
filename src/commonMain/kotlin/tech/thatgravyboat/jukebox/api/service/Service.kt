@@ -24,4 +24,6 @@ interface Service {
 
     fun next() = move(true)
     fun prev() = move(false)
+
+    fun getServiceType() = ServiceType.UNKNOWN
 }

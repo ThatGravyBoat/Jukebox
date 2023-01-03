@@ -4,6 +4,14 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import tech.thatgravyboat.jukebox.api.state.*
 
+private val DEFAULT_SONG = Song(
+    "No song playing",
+    listOf("No artist"),
+    "",
+    "https://open.spotify.com",
+    PlayingType.UNKNOWN
+)
+
 @Serializable
 data class PlayerItem(
     @SerialName("duration_ms") val duration: Long,
@@ -42,24 +50,33 @@ data class DeviceData(
 
 @Serializable
 data class SpotifyPlayerState(
-    @SerialName("shuffle_state") val isShuffling: Boolean,
-    @SerialName("repeat_state") val repeat: SpotifyRepeatState,
+    @SerialName("shuffle_state") val isShuffling: Boolean = false,
+    @SerialName("repeat_state") val repeat: SpotifyRepeatState = SpotifyRepeatState.OFF,
     @SerialName("progress_ms") val progress: Long = 0,
     @SerialName("is_playing") val isPlaying: Boolean,
-    @SerialName("item") val item: PlayerItem,
+    @SerialName("item") val item: PlayerItem? = null,
     @SerialName("device") val device: DeviceData,
-    @SerialName("currently_playing_type") val playingType: SpotifyPlayingType
+    @SerialName("currently_playing_type") val playingType: SpotifyPlayingType = SpotifyPlayingType.UNKNOWN
 ) : SpotifyState {
+
+    private fun getDuration(): Long {
+        return item?.duration ?: 0
+    }
 
     val state: State
         get() {
-            val songState = SongState((progress / 1000).toInt(), (item.duration / 1000).toInt(), isPlaying)
-            val song = Song(
-                item.title,
-                item.artists.map(Artist::name),
-                item.album.images.sortedWith(compareByDescending(AlbumImage::width)).first().url,
-                item.urls.url,
-                playingType.base)
+            val songState = SongState((progress / 1000).toInt(), (getDuration() / 1000).toInt(), isPlaying)
+            val song = if (item != null) {
+                Song(
+                    item.title,
+                    item.artists.map(Artist::name),
+                    item.album.images.sortedWith(compareByDescending(AlbumImage::width)).first().url,
+                    item.urls.url,
+                    playingType.base
+                )
+            } else {
+                DEFAULT_SONG
+            }
             val playerState = PlayerState(if (isShuffling) ShuffleState.ON else ShuffleState.OFF, repeat.base, device.volumePercent)
             return State(playerState, song, songState)
         }
