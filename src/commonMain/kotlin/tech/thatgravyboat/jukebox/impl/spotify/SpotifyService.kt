@@ -9,7 +9,9 @@ import tech.thatgravyboat.jukebox.api.service.ServicePhase
 import tech.thatgravyboat.jukebox.api.service.ServiceType
 import tech.thatgravyboat.jukebox.api.state.RepeatState
 import tech.thatgravyboat.jukebox.api.state.ShuffleState
-import tech.thatgravyboat.jukebox.impl.spotify.state.*
+import tech.thatgravyboat.jukebox.impl.spotify.state.SpotifyError
+import tech.thatgravyboat.jukebox.impl.spotify.state.SpotifyErrorState
+import tech.thatgravyboat.jukebox.impl.spotify.state.SpotifyStateSerializer
 import tech.thatgravyboat.jukebox.utils.Http.get
 import tech.thatgravyboat.jukebox.utils.Http.plus
 import tech.thatgravyboat.jukebox.utils.Http.post
@@ -70,10 +72,10 @@ class SpotifyService(var token: String?) : BaseService() {
 
                     if (data is SpotifyErrorState) {
                         onError("Polling error: ${data.error}")
-                    } else if (data is SpotifyPlayerState) {
-                        onSuccess(data.state)
-                    } else if (data is SpotifyPrivatePlayerState) {
-                        onSuccess(data.state)
+                    } else if (data.getState() != null) {
+                        onSuccess(data.getState()!!)
+                    } else {
+                        onError("Unknown player state: ${data::class.simpleName}")
                     }
                 }
             }

@@ -21,11 +21,10 @@ data class SpotifyPrivatePlayerState(
     @SerialName("currently_playing_type") val playingType: SpotifyPlayingType = SpotifyPlayingType.UNKNOWN
 ) : SpotifyState {
 
-    val state: State
-        get() {
-            val songState = SongState(0, 0, isPlaying)
-            val playerState = PlayerState(if (isShuffling) ShuffleState.ON else ShuffleState.OFF, repeat.base, device.volumePercent)
-            return State(playerState, PRIVATE_SONG, songState)
-        }
+    override fun getState(): State {
+        val songState = SongState(0, 0, isPlaying)
+        val playerState = PlayerState(if (isShuffling) ShuffleState.ON else ShuffleState.OFF, repeat.base, device.volumePercent)
+        return State(playerState, PRIVATE_SONG, songState)
+    }
 }
 

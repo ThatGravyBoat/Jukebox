@@ -1,3 +1,10 @@
 package tech.thatgravyboat.jukebox.impl.spotify.state
 
-sealed interface SpotifyState
+import tech.thatgravyboat.jukebox.api.state.State
+
+sealed interface SpotifyState {
+
+    fun getState(): State? {
+        return null
+    }
+}
