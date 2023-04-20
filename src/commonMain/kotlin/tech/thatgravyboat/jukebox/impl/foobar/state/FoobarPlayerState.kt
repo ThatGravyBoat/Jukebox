@@ -17,6 +17,8 @@ data class ActiveItem(
     @SerialName("columns") val dataColumns: List<String>,
     @SerialName("duration") val duration: Float,
     @SerialName("position") val progress: Float,
+    @SerialName("playlistId") val playlist: String,
+    @SerialName("index") val index: Int,
 )
 
 @Serializable

@@ -7,8 +7,7 @@ import kotlinx.serialization.json.Json
 import tech.thatgravyboat.jukebox.api.service.BaseService
 import tech.thatgravyboat.jukebox.api.service.ServicePhase
 import tech.thatgravyboat.jukebox.api.service.ServiceType
-import tech.thatgravyboat.jukebox.api.state.RepeatState
-import tech.thatgravyboat.jukebox.api.state.ShuffleState
+import tech.thatgravyboat.jukebox.api.state.*
 import tech.thatgravyboat.jukebox.impl.foobar.state.FoobarErrorState
 import tech.thatgravyboat.jukebox.impl.foobar.state.FoobarPlayerState
 import tech.thatgravyboat.jukebox.impl.foobar.state.FoobarStateSerializer
@@ -20,7 +19,7 @@ import tech.thatgravyboat.jukebox.utils.Scheduler
 import tech.thatgravyboat.jukebox.utils.Scheduler.invokeCancel
 import kotlin.time.DurationUnit
 
-class FoobarService(port: Int = 7684) : BaseService() {
+class FoobarService(private val port: Int = 7684, private val showArtwork: Boolean = false) : BaseService() {
 
     private val url: Url = Url("http://localhost:${port}/api/query?player=true&trcolumns=%25artist%25%2C%25title%25")
     private val basePlayerUrl: Url = Url("http://localhost:${port}/api/player")
@@ -72,11 +71,29 @@ class FoobarService(port: Int = 7684) : BaseService() {
                         data.player.playbackModes.forEachIndexed { index, playbackMode ->
                             options[playbackMode] = index
                         }
-                        onSuccess(data.state)
+                        onSuccess(overrideState(data))
                     }
                 }
             }
         }
+    }
+
+    private fun overrideState(state: FoobarPlayerState): State {
+        if (state.state.song.type == PlayingType.TRACK && showArtwork) {
+            val artworkUrl = "http://localhost:${port}/api/artwork/${state.player.activeItem.playlist}/${state.player.activeItem.index}"
+            return State(
+                state.state.player,
+                Song(
+                    state.state.song.title,
+                    state.state.song.artists,
+                    artworkUrl,
+                    state.state.song.url,
+                    state.state.song.type
+                ),
+                state.state.songState
+            )
+        }
+        return state.state
     }
 
     //region State Management

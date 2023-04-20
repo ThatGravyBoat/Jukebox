@@ -28,6 +28,11 @@ data class YoutubePlayerState(
     @SerialName("track") val track: TrackState
 ) {
 
+    private fun isLikelyAnAd(): Boolean {
+        if (track.isAd) return true
+        return track.artist == "Video will play after ad" && track.title == ""
+    }
+
     val state: State
         get() {
             val songState = SongState((track.duration * (player.progress ?: 0.0)).toInt(), track.duration, !player.isPaused)
@@ -36,7 +41,7 @@ data class YoutubePlayerState(
                 listOf(track.artist),
                 track.cover,
                 track.url,
-                if (track.isAd) PlayingType.AD else PlayingType.TRACK
+                if (isLikelyAnAd()) PlayingType.AD else PlayingType.TRACK
             )
             val playerState = PlayerState(ShuffleState.DISABLED, player.repeat.base, player.volumePercentage)
             return State(playerState, song, songState)
