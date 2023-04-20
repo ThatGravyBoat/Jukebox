@@ -29,6 +29,11 @@ class YoutubeService(password: String) : BaseSocketService(CloseableSocket(SOCKE
 
     private var pinger: Job? = null
 
+    override fun stop(): Boolean {
+        pinger?.cancel()
+        return super.stop()
+    }
+
     override fun onMessage(message: String) {
         // This is a very crude way of doing this, but it works for now.
         // Should be replaced with a proper implementation of socket.io
