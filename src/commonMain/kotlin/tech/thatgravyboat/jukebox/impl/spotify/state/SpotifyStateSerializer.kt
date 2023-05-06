@@ -17,7 +17,7 @@ object SpotifyStateSerializer : JsonContentPolymorphicSerializer<SpotifyState>(S
         = element.objectOrNull()?.get("device")?.objectOrNull()?.get("is_private_session")?.primitiveOrNull()?.booleanOrNull ?: false
 
     private fun isLocalSession(element: JsonElement)
-        = element.objectOrNull()?.get("item")?.objectOrNull()?.get("item")?.objectOrNull()?.get("is_local")?.primitiveOrNull()?.booleanOrNull ?: false
+        = element.objectOrNull()?.get("item")?.objectOrNull()?.get("is_local")?.primitiveOrNull()?.booleanOrNull ?: false
 
     private fun JsonElement?.objectOrNull() = if (this is JsonObject) this else null
 
