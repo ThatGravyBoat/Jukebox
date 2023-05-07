@@ -7,7 +7,7 @@ import tech.thatgravyboat.jukebox.api.state.*
 @Serializable
 data class DeviceState(
     @SerialName("isPaused") val isPaused: Boolean,
-    @SerialName("volumePercent") val volumePercentage: Int,
+    @SerialName("volumePercent") val volumePercentage: Double,
     @SerialName("statePercent") val progress: Double?,
     @SerialName("repeatType") val repeat: YoutubeRepeatState
 )
@@ -43,7 +43,7 @@ data class YoutubePlayerState(
                 track.url,
                 if (isLikelyAnAd()) PlayingType.AD else PlayingType.TRACK
             )
-            val playerState = PlayerState(ShuffleState.DISABLED, player.repeat.base, player.volumePercentage)
+            val playerState = PlayerState(ShuffleState.DISABLED, player.repeat.base, player.volumePercentage.toInt())
             return State(playerState, song, songState)
         }
 }
