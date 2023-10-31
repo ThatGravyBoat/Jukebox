@@ -28,7 +28,7 @@ class CloseableSocket(private val url: Url, private val request: (HttpRequestBui
                         (frame as? Frame.Text)?.let { text -> handler?.let { it(text.readText()) } }
                     }
                     messages.removeFirstOrNull()?.let {
-                        send(it)
+                        outgoing.trySend(Frame.Text(it))
                     }
                 }
                 connected = false
