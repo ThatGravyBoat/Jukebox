@@ -47,7 +47,7 @@ data class StateData(
             url.apple,
             PlayingType.TRACK
         ),
-        SongState(time.toInt(), (time + remainingTime).toInt(), playing)
+        SongState(time.toInt(), (time + remainingTime / 1000).toInt(), playing)
     )
 }
 
