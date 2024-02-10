@@ -12,7 +12,6 @@ import tech.thatgravyboat.jukebox.utils.CloseableSocket
 private val JSON = Json { ignoreUnknownKeys = true }
 private val API_URL = Url("ws://localhost:26369")
 
-@Deprecated("It is recommended to use CiderService instead")
 class AppleService : BaseSocketService(CloseableSocket(API_URL)) {
 
     override fun onMessage(message: String) {
