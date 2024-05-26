@@ -8,9 +8,13 @@ import io.ktor.http.*
 
 object Http {
 
-    private val client = HttpClient {
+    private var client = HttpClient {
         BrowserUserAgent()
         install(HttpTimeout)
+    }
+
+    fun setClient(client: HttpClient) {
+        this.client = client
     }
 
     operator fun Url.plus(path: String): Url {

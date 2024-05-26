@@ -26,4 +26,6 @@ interface Service {
     fun prev() = move(false)
 
     fun getServiceType() = ServiceType.UNKNOWN
+
+    fun getFunctions() = ServiceFunction.VALUES
 }

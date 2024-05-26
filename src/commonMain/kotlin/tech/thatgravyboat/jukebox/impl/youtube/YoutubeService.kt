@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import tech.thatgravyboat.jukebox.api.service.BaseSocketService
+import tech.thatgravyboat.jukebox.api.service.ServiceFunction
 import tech.thatgravyboat.jukebox.api.state.RepeatState
 import tech.thatgravyboat.jukebox.impl.youtube.state.YoutubePlayerState
 import tech.thatgravyboat.jukebox.utils.CloseableSocket
@@ -18,6 +19,7 @@ import kotlin.time.DurationUnit
 private val JSON = Json { ignoreUnknownKeys = true }
 private val SOCKET_URL = Url("ws://localhost:9863/socket.io/?EIO=2&transport=websocket")
 private val API_URL = Url("http://localhost:9863/query")
+private val FUNCTIONS = setOf(ServiceFunction.VOLUME, ServiceFunction.REPEAT, ServiceFunction.MOVE)
 
 class YoutubeService(password: String) : BaseSocketService(CloseableSocket(SOCKET_URL) {
     it.headers {
@@ -100,6 +102,8 @@ class YoutubeService(password: String) : BaseSocketService(CloseableSocket(SOCKE
         }
         return false
     }
+
+    override fun getFunctions() = FUNCTIONS
     //endregion
 
     //region Utils

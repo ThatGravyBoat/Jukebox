@@ -4,6 +4,7 @@ import io.ktor.http.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
+import tech.thatgravyboat.jukebox.api.service.ServiceFunction
 import tech.thatgravyboat.jukebox.api.service.SocketIoService
 import tech.thatgravyboat.jukebox.api.state.RepeatState
 import tech.thatgravyboat.jukebox.impl.youtubev2.state.YoutubeV2PlayerState
@@ -13,6 +14,7 @@ import tech.thatgravyboat.jukebox.utils.HttpCallback
 private val JSON = Json { ignoreUnknownKeys = true }
 private val SOCKET_URL = Url("ws://localhost:9863/socket.io/?EIO=4&transport=websocket")
 private val API_URL = Url("http://localhost:9863/api/v1/command")
+private val FUNCTIONS = setOf(ServiceFunction.VOLUME, ServiceFunction.REPEAT, ServiceFunction.MOVE)
 
 class YoutubeServiceV2(token: String) : SocketIoService(
     url = SOCKET_URL,
@@ -75,6 +77,8 @@ class YoutubeServiceV2(token: String) : SocketIoService(
         }
         return false
     }
+
+    override fun getFunctions() = FUNCTIONS
     //endregion
 
     //region Utils
