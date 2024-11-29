@@ -78,9 +78,10 @@ abstract class SocketIoService(
     override fun getServiceType() = ServiceType.WEBSOCKET
 
     private fun onMessage(message: String) {
-        if (message.startsWith("42$namespace,")) {
+        val prefix = namespace.takeIf { it != "/" }?.let { "42$it," } ?: "42"
+        if (message.startsWith(prefix)) {
             try {
-                val rawMessage = JSON.decodeFromString<JsonArray>(message.substring("42$namespace,".length))
+                val rawMessage = JSON.decodeFromString<JsonArray>(message.removePrefix(prefix))
                 if (rawMessage.size > 0) {
                     val event = rawMessage[0]
                     if (event is JsonPrimitive && event.isString) {

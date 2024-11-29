@@ -85,9 +85,9 @@ class TidalService(port: Int = 47836): BaseService() {
         return true
     }
 
-    override fun setShuffle(shuffle: Boolean): Boolean {
-        val state = getState() ?: return false
-        if (state.player.shuffle == ShuffleState.ON == shuffle) return true
+    override fun toggleShuffle(): Boolean {
+        val state = getState()?.player?.shuffle ?: return false
+        if (state == ShuffleState.DISABLED) return false
         (url + "/shuffle/toggle").post {
             if (it.status != HttpStatusCode.OK) {
                 onError("Error setting shuffle state")
@@ -96,9 +96,9 @@ class TidalService(port: Int = 47836): BaseService() {
         return true
     }
 
-    override fun setRepeat(repeat: RepeatState): Boolean {
-        val state = getState() ?: return false
-        if (state.player.repeat == repeat) return true
+    override fun toggleRepeat(): Boolean {
+        val state = getState()?.player?.repeat ?: return false
+        if (state == RepeatState.DISABLED) return false
         (url + "/repeat/toggle").post {
             if (it.status != HttpStatusCode.OK) {
                 onError("Error setting repeat state")

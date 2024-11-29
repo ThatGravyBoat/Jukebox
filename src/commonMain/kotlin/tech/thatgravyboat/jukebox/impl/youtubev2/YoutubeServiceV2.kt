@@ -46,21 +46,20 @@ class YoutubeServiceV2(token: String) : SocketIoService(
         return true
     }
 
-    override fun setShuffle(shuffle: Boolean): Boolean {
+    override fun toggleShuffle(): Boolean {
         // We don't shuffle 'round these parts!
         return false
     }
 
-    override fun setRepeat(repeat: RepeatState): Boolean {
-        val state = getState() ?: return false
-        val repeatState: Int? = when {
-            checkRepeatState(RepeatState.OFF, repeat, state) -> 0
-            checkRepeatState(RepeatState.ALL, repeat, state) -> 1
-            checkRepeatState(RepeatState.SONG, repeat, state) -> 2
-            else -> null
+    override fun toggleRepeat(): Boolean {
+        val state = when (getState()?.player?.repeat) {
+            RepeatState.OFF -> 1
+            RepeatState.SONG -> 2
+            RepeatState.DISABLED -> 0
+            else -> return false
         }
-        repeatState?.let { command("repeatMode", it) }
-        return repeatState != null
+        command("repeatMode", state)
+        return true
     }
 
     override fun move(forward: Boolean): Boolean {

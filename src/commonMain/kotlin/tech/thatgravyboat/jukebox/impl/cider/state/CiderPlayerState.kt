@@ -23,31 +23,25 @@ data class Artwork(
 @Serializable
 data class StateData(
     @SerialName("artwork") val artwork: Artwork = Artwork(),
-    @SerialName("url") val url: Url = Url(),
+    @SerialName("url") val url: String = "",
 
     @SerialName("name") val title: String = "",
     @SerialName("artistName") val artist: String = "Unknown Artist",
 
     @SerialName("currentPlaybackTime") val time: Float = 1f,
     @SerialName("remainingTime") val remainingTime: Float = 0f,
-
-    @SerialName("isPlaying") val playing: Boolean = false,
-
-    @SerialName("volume") val volume: Float = 0.25f,
-    @SerialName("shuffleMode") val shuffleMode: Int = 0,
-    @SerialName("repeatMode") val repeatMode: Int = 0,
 ) {
 
-    fun getState(volume: Float, repeat: RepeatState, shuffle: ShuffleState) = State(
+    fun getState(volume: Float, repeat: RepeatState, shuffle: ShuffleState, playback: PlaybackData) = State(
         PlayerState(shuffle, repeat, (volume * 100).toInt()),
         Song(
             title,
             listOf(artist),
             artwork.toUrl(),
-            url.apple,
+            url,
             PlayingType.TRACK
         ),
-        SongState(time.toInt(), (time + remainingTime / 1000).toInt(), playing)
+        SongState(playback.time.toInt(), (time + remainingTime / 1000).toInt(), playback.isPlaying)
     )
 }
 
@@ -57,13 +51,26 @@ data class AttributeData(
 )
 
 @Serializable
+data class PlaybackData(
+    @SerialName("currentPlaybackTime") val time: Float = 0f,
+    @SerialName("isPlaying") val isPlaying: Boolean = false,
+)
+
+@Serializable
 data class CiderPlayerState(
     @SerialName("data") val data: StateData = StateData(),
     @SerialName("type") val type: String,
 ) : CiderState {
 
-    fun getState(volume: Float, repeat: RepeatState, shuffle: ShuffleState) = data.getState(volume, repeat, shuffle)
+    fun getState(volume: Float, repeat: RepeatState, shuffle: ShuffleState, playback: PlaybackData) =
+        data.getState(volume, repeat, shuffle, playback)
 }
+
+@Serializable
+data class CiderPlaybackState(
+    @SerialName("data") val data: PlaybackData = PlaybackData(),
+    @SerialName("type") val type: String,
+) : CiderState
 
 @Serializable
 data class CiderPlayerAttributeState(
@@ -71,5 +78,6 @@ data class CiderPlayerAttributeState(
     @SerialName("type") val type: String,
 ) : CiderState {
 
-    fun getState(volume: Float, repeat: RepeatState, shuffle: ShuffleState) = data.attributes.getState(volume, repeat, shuffle)
+    fun getState(volume: Float, repeat: RepeatState, shuffle: ShuffleState, playback: PlaybackData) =
+        data.attributes.getState(volume, repeat, shuffle, playback)
 }

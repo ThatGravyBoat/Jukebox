@@ -13,7 +13,7 @@ object CiderStateSerializer : JsonContentPolymorphicSerializer<CiderState>(Cider
     override fun selectDeserializer(element: JsonElement): KSerializer<out CiderState> {
         return when (element.jsonObject["type"]?.jsonPrimitive?.content) {
             null -> BaseCiderState.serializer()
-            "playbackStatus.playbackTimeDidChange" -> CiderPlayerState.serializer()
+            "playbackStatus.playbackTimeDidChange" -> CiderPlaybackState.serializer()
             "playbackStatus.nowPlayingItemDidChange" -> CiderPlayerState.serializer()
             "playbackStatus.playbackStateDidChange" -> CiderPlayerAttributeState.serializer()
             "playerStatus.repeatModeDidChange" -> CiderFloatState.serializer()

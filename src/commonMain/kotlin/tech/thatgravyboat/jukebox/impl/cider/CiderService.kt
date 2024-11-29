@@ -1,88 +1,86 @@
 package tech.thatgravyboat.jukebox.impl.cider
 
-import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.Json
-import tech.thatgravyboat.jukebox.api.service.BaseSocketService
+import kotlinx.serialization.json.JsonElement
+import tech.thatgravyboat.jukebox.api.service.SocketIoService
 import tech.thatgravyboat.jukebox.api.state.RepeatState
 import tech.thatgravyboat.jukebox.api.state.ShuffleState
-import tech.thatgravyboat.jukebox.impl.cider.state.CiderFloatState
-import tech.thatgravyboat.jukebox.impl.cider.state.CiderPlayerState
-import tech.thatgravyboat.jukebox.impl.cider.state.CiderStateSerializer
-import tech.thatgravyboat.jukebox.utils.CloseableSocket
+import tech.thatgravyboat.jukebox.impl.cider.state.*
+import tech.thatgravyboat.jukebox.utils.Http.bodyAsJson
 import tech.thatgravyboat.jukebox.utils.Http.get
 import tech.thatgravyboat.jukebox.utils.Http.plus
 import tech.thatgravyboat.jukebox.utils.Http.post
+import tech.thatgravyboat.jukebox.utils.asFloat
+import tech.thatgravyboat.jukebox.utils.asInt
+import tech.thatgravyboat.jukebox.utils.asObject
 
 private val JSON = Json { ignoreUnknownKeys = true }
-private val SOCKET_URL = Url("ws://localhost:10766/ws")
-private val API_URL = Url("http://[::1]:10769")
+private val SOCKET_URL = Url("ws://localhost:10767/socket.io/?EIO=4&transport=websocket")
+private val API_URL = Url("http://localhost:10767/api/v1/playback")
 
-class CiderService : BaseSocketService(CloseableSocket(SOCKET_URL)) {
+class CiderService : SocketIoService(
+    url = SOCKET_URL,
+    data = mapOf()
+) {
 
-    private var repeatState: RepeatState = RepeatState.OFF
-    private var shuffleState: ShuffleState = ShuffleState.OFF
+    private var repeatState: RepeatState = RepeatState.DISABLED
+    private var shuffleState: ShuffleState = ShuffleState.DISABLED
     private var volume: Float = 0f
 
+    private var playback: PlaybackData = PlaybackData()
+
     init {
-        (API_URL + "audio").get { volume = it.bodyAsText().toFloatOrNull() ?: 0f }
-        // Cider doesn't support these features
-        // (API_URL + "repeatMode").get { repeatState = it.bodyAsText().toIntOrNull()?.toRepeatState() ?: RepeatState.DISABLED }
-        // (API_URL + "shuffleMode").get { shuffleState = it.bodyAsText().toIntOrNull()?.toShuffleState() ?: ShuffleState.DISABLED }
+        (API_URL + "volume").get { volume = it.bodyAsJson().asObject?.get("volume").asFloat ?: 0f }
+        (API_URL + "repeat-mode").get { repeatState = it.bodyAsJson().asObject?.get("value").asInt?.toRepeatState() ?: RepeatState.DISABLED }
+        (API_URL + "shuffle-mode").get { shuffleState = it.bodyAsJson().asObject?.get("value").asInt?.toShuffleState() ?: ShuffleState.DISABLED }
     }
 
-    override fun onMessage(message: String) {
-        try {
-            JSON.decodeFromString(CiderStateSerializer, message)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            onError("Error parsing Player JSON")
-            null
-        }?.apply {
-            when {
-                this is CiderPlayerState -> onSuccess(this.getState(volume, repeatState, shuffleState))
-                this is CiderFloatState && type == "playerStatus.volumeDidChange" -> volume = data
-                this is CiderFloatState && type == "playerStatus.repeatModeDidChange" -> repeatState = data.toInt().toRepeatState()
-                this is CiderFloatState && type == "playerStatus.shuffleModeDidChange" -> shuffleState = data.toInt().toShuffleState()
+    override fun onMessage(event: String?, data: List<JsonElement>) {
+        if (event == "API:Playback" && data.isNotEmpty()) {
+            try {
+                JSON.decodeFromJsonElement(CiderStateSerializer, data[0])
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onError("Error parsing Player JSON")
+                null
+            }?.let { state ->
+                when {
+                    state is CiderPlayerState -> onSuccess(state.getState(volume, repeatState, shuffleState, this.playback))
+                    state is CiderPlayerAttributeState -> onSuccess(state.getState(volume, repeatState, shuffleState, this.playback))
+                    state is CiderPlaybackState -> this.playback = state.data
+                    state is CiderFloatState && state.type == "playerStatus.volumeDidChange" -> this.volume = state.data
+                    state is CiderFloatState && state.type == "playerStatus.repeatModeDidChange" -> this.repeatState = state.data.toInt().toRepeatState()
+                    state is CiderFloatState && state.type == "playerStatus.shuffleModeDidChange" -> this.shuffleState = state.data.toInt().toShuffleState()
+                    else -> println("${data[0]}/$state")
+                }
             }
         }
     }
 
     override fun setPaused(paused: Boolean): Boolean {
-        (API_URL + if (paused) "pause" else "play").get { }
+        (API_URL + if (paused) "pause" else "play").post { }
         return true
     }
 
-    override fun setShuffle(shuffle: Boolean): Boolean {
-        val state = getState() ?: return false
-        val shuffleState: Boolean? = when {
-            (shuffle && state.player.shuffle == ShuffleState.OFF) -> true
-            (!shuffle && state.player.shuffle == ShuffleState.ON) -> false
-            else -> null
-        }
-        shuffleState?.let {
-            (API_URL + "toggleShuffle").post { }
-        }
-        return shuffleState != null
+    override fun toggleShuffle(): Boolean {
+        getState() ?: return false
+        (API_URL + "toggle-shuffle").post { }
+        return true
     }
 
-    override fun setRepeat(repeat: RepeatState): Boolean {
-        val state = getState() ?: return false
-        val repeatState: Int? = when {
-            checkRepeatState(RepeatState.OFF, repeat, state) -> 0
-            checkRepeatState(RepeatState.SONG, repeat, state) -> 1
-            checkRepeatState(RepeatState.ALL, repeat, state) -> 2
-            else -> null
-        }
-        repeatState?.let {
-            (API_URL + "toggleRepeat").post { }
-        }
-        return repeatState != null
+    override fun toggleRepeat(): Boolean {
+        getState() ?: return false
+        (API_URL + "toggle-repeat").post { }
+        return true
     }
 
     override fun setVolume(volume: Int, notify: Boolean): Boolean {
         if (volume in 0..100) {
-            (API_URL + "audio/${volume.toDouble()/100.0}").get { }
+            (API_URL + "volume").post(
+                body = "{\"volume\": ${volume.toDouble()/100.0}}",
+                contentType = ContentType.Application.Json,
+            ) {}
             onVolumeChange(volume, notify)
             return true
         }
@@ -90,7 +88,7 @@ class CiderService : BaseSocketService(CloseableSocket(SOCKET_URL)) {
     }
 
     override fun move(forward: Boolean): Boolean {
-        (API_URL + if (forward) "next" else "previous").get { }
+        (API_URL + if (forward) "next" else "previous").post { }
         return true
     }
 

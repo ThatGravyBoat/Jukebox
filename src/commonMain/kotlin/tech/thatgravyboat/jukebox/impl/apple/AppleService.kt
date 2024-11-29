@@ -33,31 +33,22 @@ class AppleService : BaseSocketService(CloseableSocket(API_URL)) {
         return true
     }
 
-    override fun setShuffle(shuffle: Boolean): Boolean {
+    override fun toggleShuffle(): Boolean {
         val state = getState() ?: return false
-        val shuffleState: Boolean? = when {
-            (shuffle && state.player.shuffle == ShuffleState.OFF) -> true
-            (!shuffle && state.player.shuffle == ShuffleState.ON) -> false
-            else -> null
-        }
-        shuffleState?.let {
-            socket.send("{\"action\":\"set-shuffle\", \"shuffle\":$it}")
-        }
-        return shuffleState != null
+        if (state.player.shuffle == ShuffleState.DISABLED) return false
+        socket.send("{\"action\":\"set-shuffle\", \"shuffle\":${!state.isShuffling}}")
+        return true
     }
 
-    override fun setRepeat(repeat: RepeatState): Boolean {
-        val state = getState() ?: return false
-        val repeatState: Int? = when {
-            checkRepeatState(RepeatState.OFF, repeat, state) -> 0
-            checkRepeatState(RepeatState.SONG, repeat, state) -> 1
-            checkRepeatState(RepeatState.ALL, repeat, state) -> 2
-            else -> null
+    override fun toggleRepeat(): Boolean {
+        val repeatState: Int = when (getState()?.player?.repeat) {
+            RepeatState.OFF -> 1
+            RepeatState.SONG -> 2
+            RepeatState.ALL -> 0
+            else -> return false
         }
-        repeatState?.let {
-            socket.send("{\"action\":\"set-repeat\", \"repeat\":$it}")
-        }
-        return repeatState != null
+        socket.send("{\"action\":\"set-repeat\", \"repeat\":$repeatState}")
+        return true
     }
 
     override fun setVolume(volume: Int, notify: Boolean): Boolean {

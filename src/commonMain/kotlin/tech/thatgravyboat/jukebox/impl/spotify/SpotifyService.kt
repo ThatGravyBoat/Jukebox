@@ -95,37 +95,31 @@ class SpotifyService(var token: String?) : BaseService() {
         return path != null
     }
 
-    override fun setShuffle(shuffle: Boolean): Boolean {
-        val state = getState()
-        if (state == null || token == null) return false
-        val shuffleState: Boolean? = when {
-            (shuffle && state.player.shuffle == ShuffleState.OFF) -> true
-            (!shuffle && state.player.shuffle == ShuffleState.ON) -> false
-            else -> null
+    override fun toggleShuffle(): Boolean {
+        if (token == null) return false
+        val state = when (getState()?.player?.shuffle) {
+            ShuffleState.OFF -> true
+            ShuffleState.ON -> false
+            else -> return false
         }
-        shuffleState?.let {
-            putCode( API_URL + "shuffle?state=$shuffleState") {
-                if (it.status == HttpStatusCode.Unauthorized) onUnauthorized()
-            }
+        putCode( API_URL + "shuffle?state=$state") {
+            if (it.status == HttpStatusCode.Unauthorized) onUnauthorized()
         }
-        return shuffleState != null
+        return true
     }
 
-    override fun setRepeat(repeat: RepeatState): Boolean {
-        val state = getState()
-        if (state == null || token == null) return false
-        val repeatState: String? = when {
-            checkRepeatState(RepeatState.OFF, repeat, state) -> "off"
-            checkRepeatState(RepeatState.SONG, repeat, state) -> "track"
-            checkRepeatState(RepeatState.ALL, repeat, state) -> "context"
-            else -> null
+    override fun toggleRepeat(): Boolean {
+        if (token == null) return false
+        val state = when (getState()?.player?.repeat) {
+            RepeatState.OFF -> "track"
+            RepeatState.SONG -> "context"
+            RepeatState.ALL -> "off"
+            else -> return false
         }
-        repeatState?.let {
-            putCode( API_URL + "repeat?state=$repeatState") {
-                if (it.status  == HttpStatusCode.Unauthorized) onUnauthorized()
-            }
+        putCode( API_URL + "repeat?state=$state") {
+            if (it.status == HttpStatusCode.Unauthorized) onUnauthorized()
         }
-        return repeatState != null
+        return true
     }
 
     override fun move(forward: Boolean): Boolean {

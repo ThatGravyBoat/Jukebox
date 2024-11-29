@@ -107,37 +107,29 @@ class FoobarService(private val port: Int = 7684, private val showArtwork: Boole
         return path != null
     }
 
-    override fun setShuffle(shuffle: Boolean): Boolean {
-        val state = getState()
-        if (state == null) return false
-        val shuffleState: Boolean? = when {
-            (shuffle && state.player.shuffle == ShuffleState.OFF) -> true
-            (!shuffle && state.player.shuffle == ShuffleState.ON) -> false
-            else -> null
+    override fun toggleShuffle(): Boolean {
+        val state = when (getState()?.player?.shuffle) {
+            ShuffleState.ON -> "Default"
+            ShuffleState.OFF -> "Shuffle (tracks)"
+            else -> return false
         }
-        shuffleState?.let {
-            val id = if (shuffleState) options["Shuffle (tracks)"] else options["Default"] ?: return false
-            val data = "{\"options\":[{\"id\":\"playbackOrder\",\"value\":${id}}]}"
-            postCode(basePlayerUrl, data) {}
-        }
-        return shuffleState != null
+        val id = options[state] ?: return false
+        val data = "{\"options\":[{\"id\":\"playbackOrder\",\"value\":${id}}]}"
+        postCode(basePlayerUrl, data) {}
+        return true
     }
 
-    override fun setRepeat(repeat: RepeatState): Boolean {
-        val state = getState()
-        if (state == null) return false
-        val repeatState: String? = when {
-            checkRepeatState(RepeatState.OFF, repeat, state) -> "oDefaultff"
-            checkRepeatState(RepeatState.SONG, repeat, state) -> "Repeat (track)"
-            checkRepeatState(RepeatState.ALL, repeat, state) -> "Repeat (playlist)"
-            else -> null
+    override fun toggleRepeat(): Boolean {
+        val state = when (getState()?.player?.repeat) {
+            RepeatState.OFF -> "Repeat (track)"
+            RepeatState.SONG -> "Repeat (playlist)"
+            RepeatState.ALL -> "Off"
+            else -> return false
         }
-        repeatState?.let {
-            val id = options[repeatState] ?: return false
-            val data = "{\"options\":[{\"id\":\"playbackOrder\",\"value\":${id}}]}"
-            postCode(basePlayerUrl, data) {}
-        }
-        return repeatState != null
+        val id = options[state] ?: return false
+        val data = "{\"options\":[{\"id\":\"playbackOrder\",\"value\":${id}}]}"
+        postCode(basePlayerUrl, data) {}
+        return true
     }
 
     override fun move(forward: Boolean): Boolean {

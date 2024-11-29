@@ -5,9 +5,12 @@ import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 
 object Http {
 
+    private val JSON = Json { ignoreUnknownKeys = true }
     private var client = HttpClient {
         BrowserUserAgent()
         install(HttpTimeout)
@@ -57,6 +60,8 @@ object Http {
             callback(response)
         }
     }
+
+    suspend fun HttpResponse.bodyAsJson(): JsonElement? = runCatching { JSON.parseToJsonElement(bodyAsText()) }.getOrNull()
 }
 
 typealias HttpCallback = suspend (HttpResponse) -> Unit

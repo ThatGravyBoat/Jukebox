@@ -105,8 +105,8 @@ object BaseServiceTest {
         override fun restart() {}
         override fun getPhase() = ServicePhase.STOPPED
         override fun setPaused(paused: Boolean) = true
-        override fun setShuffle(shuffle: Boolean) = true
-        override fun setRepeat(repeat: RepeatState) = true
+        override fun toggleShuffle(): Boolean = true
+        override fun toggleRepeat(): Boolean = true
         override fun setVolume(volume: Int, notify: Boolean) = true
         override fun move(forward: Boolean) = true
     }

@@ -71,21 +71,20 @@ class YoutubeService(password: String) : BaseSocketService(CloseableSocket(SOCKE
         return true
     }
 
-    override fun setShuffle(shuffle: Boolean): Boolean {
+    override fun toggleShuffle(): Boolean {
         // We don't shuffle 'round these parts!
         return false
     }
 
-    override fun setRepeat(repeat: RepeatState): Boolean {
-        val state = getState() ?: return false
-        val repeatState: String? = when {
-            checkRepeatState(RepeatState.OFF, repeat, state) -> "NONE"
-            checkRepeatState(RepeatState.SONG, repeat, state) -> "ONE"
-            checkRepeatState(RepeatState.ALL, repeat, state) -> "ALL"
-            else -> null
+    override fun toggleRepeat(): Boolean {
+        val state: String = when (getState()?.player?.repeat) {
+            RepeatState.OFF -> "ONE"
+            RepeatState.SONG -> "ALL"
+            RepeatState.ALL -> "NONE"
+            else -> return false
         }
-        repeatState?.let { command("player-repeat", it) }
-        return repeatState != null
+        command("player-repeat", state)
+        return true
     }
 
     override fun move(forward: Boolean): Boolean {
