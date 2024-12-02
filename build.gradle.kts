@@ -20,10 +20,6 @@ kotlin {
                 useJUnitPlatform()
             }
         }
-        js {
-            browser()
-            nodejs()
-        }
     }
 
     sourceSets {
@@ -32,6 +28,8 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
                 implementation("io.ktor:ktor-client-core:2.1.0")
+                implementation("io.ktor:ktor-network:2.1.0")
+                implementation("io.ktor:ktor-network-tls:2.1.0")
             }
         }
         val commonTest by getting {

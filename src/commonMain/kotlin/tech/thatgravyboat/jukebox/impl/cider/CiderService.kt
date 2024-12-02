@@ -52,7 +52,6 @@ class CiderService : SocketIoService(
                     state is CiderFloatState && state.type == "playerStatus.volumeDidChange" -> this.volume = state.data
                     state is CiderFloatState && state.type == "playerStatus.repeatModeDidChange" -> this.repeatState = state.data.toInt().toRepeatState()
                     state is CiderFloatState && state.type == "playerStatus.shuffleModeDidChange" -> this.shuffleState = state.data.toInt().toShuffleState()
-                    else -> println("${data[0]}/$state")
                 }
             }
         }
