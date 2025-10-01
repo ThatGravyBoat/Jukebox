@@ -4,5 +4,6 @@ enum class ServiceType {
     WEBSOCKET,
     HTTP,
     TCP,
+    NATIVE,
     UNKNOWN
 }
