@@ -24,6 +24,32 @@ object AppleMusicCommands {
     return result
     """.trimIndent()
 
+    val ALBUM_ART_COMMAND = """
+    tell application "music"
+      if player state is playing then
+        set output_directory to POSIX path of (path to temporary items)
+        if format of artwork 1 of current track is JPEG picture then
+          set output_file to output_directory & "jukebox-cover-image.jpg"
+        else
+          set output_file to output_directory & "jukebox-cover-image.png"
+        end
+
+        set output_file_access to open for access output_file with write permission
+
+        try
+          set album_art to raw data of artwork 1 of current track
+          write album_art to output_file_access starting at 0
+        on error
+        end try
+
+        close access output_file_access
+        return "file://" & output_file
+      else
+        return ""
+      end if
+    end tell
+    """.trimIndent()
+
     val PAUSE_COMMAND = """
     tell application "music"
     pause

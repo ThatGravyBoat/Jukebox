@@ -13,6 +13,7 @@ import kotlin.time.DurationUnit
 class AppleMusicService(var executor: suspend (String) -> String?) : BaseService() {
 
     private var poller: Job? = null
+    private var image: String = ""
 
     override fun start() {
         this.poller = Scheduler.schedule(0, 2, DurationUnit.SECONDS) { requestPlayer() }
@@ -43,7 +44,12 @@ class AppleMusicService(var executor: suspend (String) -> String?) : BaseService
         if (state == null) {
             onError("Couldn't read player state: $result")
         } else {
-            onSuccess(state.getState())
+            val newState = state.getState()
+            val changedSong = this.getState()?.isSame(newState) != true
+            if (changedSong) {
+                this.image = executor.invoke(AppleMusicCommands.ALBUM_ART_COMMAND) ?: ""
+            }
+            onSuccess(newState.copy(song = newState.song.copy(cover = this.image)))
         }
     }
 
