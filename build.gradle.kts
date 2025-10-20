@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "tech.thatgravyboat"
-version = "1.0-SNAPSHOT"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -69,11 +69,11 @@ publishing {
     }
     repositories {
         maven {
-            setUrl("https://maven.resourcefulbees.com/repository/thatgravyboat/")
+            setUrl("https://maven.teamresourceful.com/repository/thatgravyboat/")
 
             credentials {
-                username = System.getenv("MAVEN_USER")
-                password = System.getenv("MAVEN_PASS")
+                username = System.getenv("MAVEN_USER") ?: providers.gradleProperty("maven_username").orNull
+                password = System.getenv("MAVEN_PASS") ?: providers.gradleProperty("maven_password").orNull
             }
         }
     }
