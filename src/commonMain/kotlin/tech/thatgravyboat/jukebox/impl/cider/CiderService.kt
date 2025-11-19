@@ -28,7 +28,8 @@ class CiderService : SocketIoService(
     private var shuffleState: ShuffleState = ShuffleState.DISABLED
     private var volume: Float = 0f
 
-    private var playback: PlaybackData = PlaybackData()
+    private var playback: PlaybackData = PlaybackData(0f, 0f, false)
+    private var state: StateData = StateData()
 
     init {
         (API_URL + "volume").get { volume = it.bodyAsJson().asObject?.get("volume").asFloat ?: 0f }
@@ -46,13 +47,16 @@ class CiderService : SocketIoService(
                 null
             }?.let { state ->
                 when {
-                    state is CiderPlayerState -> onSuccess(state.getState(volume, repeatState, shuffleState, this.playback))
-                    state is CiderPlayerAttributeState -> onSuccess(state.getState(volume, repeatState, shuffleState, this.playback))
+                    state is CiderPlayerState -> this.state = state.data
+                    state is CiderPlayerAttributeState -> this.state = state.data.attributes
                     state is CiderPlaybackState -> this.playback = state.data
                     state is CiderFloatState && state.type == "playerStatus.volumeDidChange" -> this.volume = state.data
                     state is CiderFloatState && state.type == "playerStatus.repeatModeDidChange" -> this.repeatState = state.data.toInt().toRepeatState()
                     state is CiderFloatState && state.type == "playerStatus.shuffleModeDidChange" -> this.shuffleState = state.data.toInt().toShuffleState()
+                    else -> return
                 }
+
+                onDataChanged()
             }
         }
     }
@@ -89,6 +93,10 @@ class CiderService : SocketIoService(
     override fun move(forward: Boolean): Boolean {
         (API_URL + if (forward) "next" else "previous").post { }
         return true
+    }
+
+    private fun onDataChanged() {
+        onSuccess(state.getState(volume, repeatState, shuffleState, this.playback))
     }
 
     private fun Int.toRepeatState(): RepeatState {

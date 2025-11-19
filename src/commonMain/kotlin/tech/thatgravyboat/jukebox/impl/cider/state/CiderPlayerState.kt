@@ -27,9 +27,6 @@ data class StateData(
 
     @SerialName("name") val title: String = "",
     @SerialName("artistName") val artist: String = "Unknown Artist",
-
-    @SerialName("currentPlaybackTime") val time: Float = 1f,
-    @SerialName("remainingTime") val remainingTime: Float = 0f,
 ) {
 
     fun getState(volume: Float, repeat: RepeatState, shuffle: ShuffleState, playback: PlaybackData) = State(
@@ -41,7 +38,7 @@ data class StateData(
             url,
             PlayingType.TRACK
         ),
-        SongState(playback.time.toInt(), (time + remainingTime / 1000).toInt(), playback.isPlaying)
+        SongState(playback.time.toInt(), playback.duration.toInt(), playback.isPlaying)
     )
 }
 
@@ -53,6 +50,7 @@ data class AttributeData(
 @Serializable
 data class PlaybackData(
     @SerialName("currentPlaybackTime") val time: Float = 0f,
+    @SerialName("currentPlaybackDuration") val duration: Float = 0f,
     @SerialName("isPlaying") val isPlaying: Boolean = false,
 )
 
@@ -74,7 +72,7 @@ data class CiderPlaybackState(
 
 @Serializable
 data class CiderPlayerAttributeState(
-    @SerialName("attributes") val data: AttributeData = AttributeData(),
+    @SerialName("data") val data: AttributeData = AttributeData(),
     @SerialName("type") val type: String,
 ) : CiderState {
 
